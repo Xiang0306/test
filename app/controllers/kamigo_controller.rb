@@ -34,7 +34,7 @@ class KamigoController < ApplicationController
   	end
 
   	#最簡單能發出 Request 的方法,我們先把網址字串轉換成URI物件,透過 Net::HTTP.get這個方法,他會接受一個網址,然後把Response的Body部分以字串的形式傳回。
-  	#http://localhost:3000/kamigo/response_body
+  	#http://localhost:3000/kamigo/sent_request
   	def sent_request
   		uri = URI('http://localhost:3000/kamigo/eat')
 	    http = Net::HTTP.new(uri.host, uri.port)
