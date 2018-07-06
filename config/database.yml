@@ -5,14 +5,17 @@
 #   gem 'sqlite3'
 #
 default: &default
+  #adapter：要採用哪一套資料庫，預設使用 postgresql
   adapter: postgresql
+  #pool：是同時連線數量，可以理解成頻寬
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  #timeout：超過 5000 毫秒資料庫還不回應的話就當作逾時
   timeout: 5000
 
 development:
-  <<: *default
+  <<: *default #<<: *default：採用預設值
   adapter: sqlite3
-  database: db/development.sqlite3
+  database: db/development.sqlite3   #資料庫的儲存位置
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
