@@ -10,16 +10,16 @@ class KamigoController < ApplicationController
 	    # 關鍵字回覆
 	    reply_text = keyword_reply(received_text) if reply_text.nil?
 
-		# 推齊
-		reply_text = echo2(channel_id, received_text) if reply_text.nil?
+	    # 推齊
+	    reply_text = echo2(channel_id, received_text) if reply_text.nil?
 
-		# 記錄對話
-    	save_to_received(channel_id, received_text)
-    	save_to_reply(channel_id, reply_text)
+	    # 記錄對話
+	    save_to_received(channel_id, received_text)
+	    save_to_reply(channel_id, reply_text)
 
 	    # 傳送訊息到 line
 	    response = reply_to_line(reply_text)
-	    
+
 	    # 回應 200
 	    head :ok
 	end 
@@ -32,26 +32,26 @@ class KamigoController < ApplicationController
 
 	# 儲存對話
 	def save_to_received(channel_id, received_text)
-	   return if received_text.nil?
-	   Received.create(channel_id: channel_id, text: received_text)
+	    return if received_text.nil?
+	    Received.create(channel_id: channel_id, text: received_text)
 	end
 
 	# 儲存回應
 	def save_to_reply(channel_id, reply_text)
-	   return if reply_text.nil?
-	   Reply.create(channel_id: channel_id, text: reply_text)
+	    return if reply_text.nil?
+	    Reply.create(channel_id: channel_id, text: reply_text)
 	end
 	  
 	def echo2(channel_id, received_text)
-	   # 如果在 channel_id 最近沒人講過 received_text，金田醫就不回應
-	   recent_received_texts = Received.where(channel_id: channel_id).last(5)&.pluck(:text)
-	   return nil unless received_text.in? recent_received_texts
+	    # 如果在 channel_id 最近沒人講過 received_text，卡米狗就不回應
+	    recent_received_texts = Received.where(channel_id: channel_id).last(5)&.pluck(:text)
+	    return nil unless received_text.in? recent_received_texts
 	    
-	   # 如果在 channel_id 金田醫上一句回應是 received_text，金田醫就不回應
-	   last_reply_text = Reply.where(channel_id: channel_id).last&.text
-	   return nil if last_reply_text == received_text
+	    # 如果在 channel_id 卡米狗上一句回應是 received_text，卡米狗就不回應
+	    last_reply_text = Reply.where(channel_id: channel_id).last&.text
+	    return nil if last_reply_text == received_text
 
-	   received_text
+	    received_text
 	end
 
 	# 取得對方說的話
@@ -60,22 +60,22 @@ class KamigoController < ApplicationController
 	    message['text'] unless message.nil?
 	end
 
-	 # 學說話
+	# 學說話
 	def learn(received_text)
-	   #如果開頭不是 金田醫學說話; 就跳出
-	   return nil unless received_text[0..6] == '金田醫學說話;'
+	    #如果開頭不是 卡米狗學說話; 就跳出
+	    return nil unless received_text[0..6] == '卡米狗學說話;'
 	    
-	   received_text = received_text[7..-1]
-	   semicolon_index = received_text.index(';')
+	    received_text = received_text[7..-1]
+	    semicolon_index = received_text.index(';')
 
-	   # 找不到分號就跳出
-	   return nil if semicolon_index.nil?
+	    # 找不到分號就跳出
+	    return nil if semicolon_index.nil?
 
-	   keyword = received_text[0..semicolon_index-1]
-	   message = received_text[semicolon_index+1..-1]
+	    keyword = received_text[0..semicolon_index-1]
+	    message = received_text[semicolon_index+1..-1]
 
-	   KeywordMapping.create(keyword: keyword, message: message)
-	   '好哦～好哦～'
+		KeywordMapping.create(keyword: keyword, message: message)
+	    '好哦～好哦～'
 	end
 
 	# 關鍵字回覆
@@ -83,21 +83,21 @@ class KamigoController < ApplicationController
 	   KeywordMapping.where(keyword: received_text).last&.message
 	end
 
-	  # 傳送訊息到 line
+	# 傳送訊息到 line
 	def reply_to_line(reply_text)
-	    return nil if reply_text.nil?
+	   return nil if reply_text.nil?
 	    
-	    # 取得 reply token
-	    reply_token = params['events'][0]['replyToken']
+	   # 取得 reply token
+	   reply_token = params['events'][0]['replyToken']
 	    
-	    # 設定回覆訊息
-	    message = {
-	      type: 'text',
-	      text: reply_text
-	    } 
+	   # 設定回覆訊息
+	   message = {
+	    type: 'text',
+	    text: reply_text
+	   } 
 
-	    # 傳送訊息
-	    line.reply_message(reply_token, message)
+	   # 傳送訊息
+	   line.reply_message(reply_token, message)
 	end
 
 	  # Line Bot API 物件初始化
