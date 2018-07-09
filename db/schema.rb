@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_07_06_081049) do
+ActiveRecord::Schema.define(version: 2018_07_09_040920) do
 
   create_table "keyword_mappings", force: :cascade do |t|
     t.string "keyword"
     t.string "message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "channel_id"
   end
 
   create_table "receiveds", force: :cascade do |t|
