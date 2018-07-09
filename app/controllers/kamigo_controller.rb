@@ -2,13 +2,13 @@ require 'line/bot'
 
 class KamigoController < ApplicationController
 	protect_from_forgery with: :null_session
-
+	#主程式
 	def webhook
 	    # 學說話
-	    reply_text = learn(received_text)
+	    reply_text = learn(channel_id, received_text)
 
 	    # 關鍵字回覆
-	    reply_text = keyword_reply(received_text) if reply_text.nil?
+	    reply_text = keyword_reply(channel_id, received_text) if reply_text.nil?
 
 	    # 推齊
 	    reply_text = echo2(channel_id, received_text) if reply_text.nil?
@@ -43,11 +43,11 @@ class KamigoController < ApplicationController
 	end
 	  
 	def echo2(channel_id, received_text)
-	    # 如果在 channel_id 最近沒人講過 received_text，卡米狗就不回應
+	    # 如果在 channel_id 最近沒人講過 received_text，金田醫就不回應
 	    recent_received_texts = Received.where(channel_id: channel_id).last(5)&.pluck(:text)
 	    return nil unless received_text.in? recent_received_texts
 	    
-	    # 如果在 channel_id 卡米狗上一句回應是 received_text，卡米狗就不回應
+	    # 如果在 channel_id金田醫上一句回應是 received_text，金田醫就不回應
 	    last_reply_text = Reply.where(channel_id: channel_id).last&.text
 	    return nil if last_reply_text == received_text
 
@@ -61,9 +61,9 @@ class KamigoController < ApplicationController
 	end
 
 	# 學說話
-	def learn(received_text)
-	    #如果開頭不是 卡米狗學說話; 就跳出
-	    return nil unless received_text[0..6] == '卡米狗學說話;'
+	def learn(channel_id, received_text)
+	    #如果開頭不是 金田醫學說話; 就跳出
+	    return nil unless received_text[0..6] == '金田醫學說話;'
 	    
 	    received_text = received_text[7..-1]
 	    semicolon_index = received_text.index(';')
@@ -74,12 +74,13 @@ class KamigoController < ApplicationController
 	    keyword = received_text[0..semicolon_index-1]
 	    message = received_text[semicolon_index+1..-1]
 
-		KeywordMapping.create(keyword: keyword, message: message)
-	    '好哦～好哦～'
+		KeywordMapping.create(channel_id: channel_id, keyword: keyword, message: message)
 	end
 
 	# 關鍵字回覆
-	def keyword_reply(received_text)
+	def keyword_reply(channel_id, received_text)
+	   message = KeywordMapping.where(channel_id: channel_id, keyword: received_text).last&.message
+	   return message unless message.nil?
 	   KeywordMapping.where(keyword: received_text).last&.message
 	end
 
